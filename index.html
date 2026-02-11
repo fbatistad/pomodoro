@@ -13,10 +13,10 @@
             --md-sys-color-primary: #ba1a1a;
             --md-sys-color-on-primary: #ffffff;
             --md-sys-color-primary-container: #ffdad6;
-            --md-sys-color-on-primary-container: #410002;
             --md-sys-color-surface: #fffbff;
             --md-sys-color-outline: #857371;
             --md-sys-color-surface-variant: #f5ddda;
+            --md-sys-color-on-primary-container: #410002;
         }
 
         * {
@@ -31,8 +31,7 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            overflow: hidden; 
-            display: flex;
+            overflow: hidden;
             color: #1f1b1b;
         }
 
@@ -42,24 +41,35 @@
             display: flex;
             flex-direction: column;
             padding: 16px;
+            transition: transform 0.3s ease;
         }
 
-        /* Layout Adaptável */
+        /* Sistema de Telas */
+        .page {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* Layout Adaptável Principal */
         .main-content {
             display: flex;
-            flex-direction: column; 
+            flex-direction: column;
             flex-grow: 1;
-            gap: 16px;
+            gap: 24px;
             align-items: center;
             justify-content: center;
         }
 
-        /* Mudança para Paisagem */
         @media (orientation: landscape) and (min-height: 300px) {
             .main-content {
                 flex-direction: row;
                 justify-content: space-around;
-                width: 100%;
             }
             .grid-section {
                 flex-grow: 1;
@@ -67,20 +77,11 @@
             }
         }
 
-        .tomato-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
         .tomato-container {
             width: 30vh;
             height: 30vh;
-            max-width: 220px;
-            max-height: 220px;
-            min-width: 120px;
-            min-height: 120px;
+            max-width: 200px;
+            max-height: 200px;
         }
 
         .grid-section {
@@ -88,13 +89,13 @@
             max-width: 450px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
         }
 
         .grid-pomodoros {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 2%;
+            gap: 12px;
             width: 100%;
         }
 
@@ -104,24 +105,22 @@
             padding-top: 100%;
         }
 
-        /* Tooltip de Horário Sugerido */
+        /* Tooltip */
         .checkbox-wrapper::before {
             content: attr(data-time);
             position: absolute;
             bottom: 110%;
             left: 50%;
             transform: translateX(-50%) translateY(5px);
-            background: #410002;
+            background: var(--md-sys-color-on-primary-container);
             color: white;
             padding: 4px 8px;
             border-radius: 6px;
             font-size: 10px;
-            white-space: nowrap;
             opacity: 0;
             visibility: hidden;
             transition: all 0.2s ease;
             z-index: 50;
-            pointer-events: none;
         }
 
         .checkbox-wrapper:hover::before {
@@ -132,30 +131,26 @@
 
         .pomodoro-checkbox {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             appearance: none;
             border: 2px solid var(--md-sys-color-outline);
-            border-radius: clamp(8px, 2vh, 14px);
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: white;
+            transition: 0.2s;
         }
 
         .pomodoro-checkbox:checked {
             background-color: var(--md-sys-color-primary);
             border-color: var(--md-sys-color-primary);
-            transform: scale(0.92);
         }
 
         .pomodoro-checkbox::after {
             content: attr(data-index);
-            font-size: clamp(10px, 2.5vh, 16px);
             font-weight: 700;
             color: var(--md-sys-color-outline);
         }
@@ -168,12 +163,11 @@
             display: flex;
             gap: 12px;
             width: 100%;
-            justify-content: center;
         }
 
         .icon-btn {
             background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
+            color: white;
             border-radius: 16px;
             height: 56px;
             flex: 1;
@@ -182,8 +176,7 @@
             justify-content: center;
             border: none;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
 
         .icon-btn.secondary {
@@ -192,33 +185,33 @@
             box-shadow: none;
         }
 
-        .icon-btn:hover {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-        }
-
-        #history-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 16px;
-        }
-
-        .modal-content {
+        /* Estilo da Página de Histórico */
+        #history-page {
             background: var(--md-sys-color-surface);
-            border-radius: 28px;
-            width: 100%;
-            max-width: 450px;
-            max-height: 90vh;
-            overflow-y: auto;
             padding: 24px;
+            overflow-y: auto;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .month-selector {
+            background: var(--md-sys-color-surface-variant);
+            border-radius: 12px;
+            padding: 8px 16px;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .star-icon {
+            color: var(--md-sys-color-primary);
+            filter: drop-shadow(0 0 1px rgba(186, 26, 26, 0.2));
         }
 
         #tomato-fill {
@@ -229,99 +222,114 @@
 <body>
 
     <div class="app-container">
-        <!-- Secção de cabeçalho removida a pedido -->
-        
-        <div class="main-content">
-            <div class="tomato-section">
-                <div class="tomato-container">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <clipPath id="tomato-clip">
-                                <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" />
-                            </clipPath>
-                        </defs>
-                        <path d="M50 22 L45 10 L50 15 L55 10 L50 22 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-                        <path d="M50 22 L35 15 L45 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-                        <path d="M50 22 L65 15 L55 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-                        <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" 
-                              fill="none" stroke="#ba1a1a" stroke-width="2" />
-                        <rect id="tomato-fill" x="0" y="90" width="100" height="0" fill="#ba1a1a" clip-path="url(#tomato-clip)" />
-                    </svg>
+        <!-- TELA PRINCIPAL -->
+        <div id="main-page" class="page active">
+            <div class="main-content">
+                <div class="tomato-section">
+                    <div class="tomato-container">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <clipPath id="tomato-clip">
+                                    <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" />
+                                </clipPath>
+                            </defs>
+                            <path d="M50 22 L45 10 L50 15 L55 10 L50 22 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+                            <path d="M50 22 L35 15 L45 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+                            <path d="M50 22 L65 15 L55 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+                            <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" 
+                                  fill="none" stroke="#ba1a1a" stroke-width="2" />
+                            <rect id="tomato-fill" x="0" y="90" width="100" height="0" fill="#ba1a1a" clip-path="url(#tomato-clip)" />
+                        </svg>
+                    </div>
                 </div>
-            </div>
 
-            <div class="grid-section">
-                <div class="grid-pomodoros" id="grid"></div>
-                
-                <div class="actions-row">
-                    <button class="icon-btn" id="completeBtn" title="Completar Sessão">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </button>
-                    <button class="icon-btn secondary" id="viewHistoryBtn" title="Ver Histórico">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
-                    </button>
+                <div class="grid-section">
+                    <div class="grid-pomodoros" id="grid"></div>
+                    
+                    <div class="actions-row">
+                        <button class="icon-btn" id="completeBtn" title="Completar Próxima">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </button>
+                        <button class="icon-btn secondary" id="goHistoryBtn" title="Histórico">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="history-modal">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">Histórico</h2>
-                <button id="closeHistoryBtn" class="text-gray-400 hover:text-gray-600 p-2 text-xl">✕</button>
+        <!-- TELA DE HISTÓRICO -->
+        <div id="history-page" class="page">
+            <div class="history-header">
+                <button id="backBtn" class="p-2 bg-gray-100 rounded-full transition-colors hover:bg-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h2 class="text-xl font-bold">Histórico</h2>
+                <select id="monthSelector" class="month-selector ml-auto"></select>
             </div>
-            <div style="height: 180px;">
+
+            <div class="mb-8" style="min-height: 200px;">
                 <canvas id="historyChart"></canvas>
             </div>
-            <div id="history-list" class="mt-4 text-sm overflow-y-auto max-h-[40vh]"></div>
+
+            <div id="historyList" class="space-y-1"></div>
         </div>
     </div>
 
     <script>
-        const totalPomodoros = 15;
+        const totalPomodoros = 14;
         const suggestedTimes = [
-            "09:00", "09:30", "10:00", "10:30", "11:15",
-            "11:45", "12:15", "12:45", "14:00", "14:30",
-            "15:00", "15:30", "16:00", "16:30", "Extra"
+            "09:00", "09:30", "10:00", "10:30", "11:15", "11:45", "12:15",
+            "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "Extra"
         ];
 
+        let state = JSON.parse(localStorage.getItem('pomodoro_state_v3')) || Array(totalPomodoros).fill(false);
+        let history = JSON.parse(localStorage.getItem('pomodoro_history_v3')) || {};
+        let chartInstance = null;
+
+        const mainPage = document.getElementById('main-page');
+        const historyPage = document.getElementById('history-page');
         const grid = document.getElementById('grid');
-        const fill = document.getElementById('tomato-fill');
-        const completeBtn = document.getElementById('completeBtn');
-        const viewHistoryBtn = document.getElementById('viewHistoryBtn');
-        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-        const historyModal = document.getElementById('history-modal');
-        const historyList = document.getElementById('history-list');
+        const tomatoFill = document.getElementById('tomato-fill');
+        const monthSelector = document.getElementById('monthSelector');
+        const historyList = document.getElementById('historyList');
 
-        let state = JSON.parse(localStorage.getItem('pomodoro_state')) || Array(totalPomodoros).fill(false);
-        let history = JSON.parse(localStorage.getItem('pomodoro_history_v2')) || {};
-
-        function getTodayString() {
-            const now = new Date();
-            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        function getTodayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         }
 
-        function checkDailyReset() {
-            const today = getTodayString();
-            const lastDate = localStorage.getItem('pomodoro_date');
-            if (lastDate && lastDate !== today) {
-                history[lastDate] = state.filter(v => v).length;
-                localStorage.setItem('pomodoro_history_v2', JSON.stringify(history));
+        function save() {
+            localStorage.setItem('pomodoro_state_v3', JSON.stringify(state));
+            localStorage.setItem('pomodoro_history_v3', JSON.stringify(history));
+            localStorage.setItem('pomodoro_last_date', getTodayKey());
+        }
+
+        function checkReset() {
+            const today = getTodayKey();
+            const last = localStorage.getItem('pomodoro_last_date');
+            if (last && last !== today) {
+                history[last] = state.filter(v => v).length;
                 state = Array(totalPomodoros).fill(false);
                 save();
             }
-            localStorage.setItem('pomodoro_date', today);
         }
 
-        function init() {
-            checkDailyReset();
+        function updateTomato() {
+            const count = state.filter(v => v).length;
+            const h = (count / totalPomodoros) * 70;
+            tomatoFill.setAttribute('height', h);
+            tomatoFill.setAttribute('y', 90 - h);
+            history[getTodayKey()] = count;
+            save();
+        }
+
+        function initGrid() {
             grid.innerHTML = '';
             state.forEach((checked, i) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'checkbox-wrapper';
-                wrapper.setAttribute('data-time', suggestedTimes[i]);
-                
+                const wrap = document.createElement('div');
+                wrap.className = 'checkbox-wrapper';
+                wrap.setAttribute('data-time', suggestedTimes[i]);
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.className = 'pomodoro-checkbox';
@@ -329,73 +337,112 @@
                 cb.dataset.index = i + 1;
                 cb.onclick = () => {
                     state[i] = !state[i];
-                    save();
                     updateTomato();
                     if (state[i]) triggerConfetti();
                 };
-                wrapper.appendChild(cb);
-                grid.appendChild(wrapper);
+                wrap.appendChild(cb);
+                grid.appendChild(wrap);
             });
             updateTomato();
         }
 
-        function updateTomato() {
-            const count = state.filter(v => v).length;
-            const h = (count / totalPomodoros) * 70;
-            fill.setAttribute('height', h);
-            fill.setAttribute('y', 90 - h);
-            history[getTodayString()] = count;
-            localStorage.setItem('pomodoro_history_v2', JSON.stringify(history));
-        }
-
-        function save() {
-            localStorage.setItem('pomodoro_state', JSON.stringify(state));
-        }
-
         function triggerConfetti() {
-            confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, colors: ['#ba1a1a', '#2e7d32'] });
+            confetti({ particleCount: 40, spread: 40, origin: { y: 0.8 }, colors: ['#ba1a1a', '#410002'] });
         }
 
-        let chartInstance = null;
+        function setupMonthSelector() {
+            const months = new Set();
+            const today = new Date();
+            months.add(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
+            
+            Object.keys(history).forEach(date => {
+                months.add(date.substring(0, 7));
+            });
+
+            monthSelector.innerHTML = '';
+            Array.from(months).sort().reverse().forEach(m => {
+                const [y, mon] = m.split('-');
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = new Date(y, mon-1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                monthSelector.appendChild(opt);
+            });
+        }
+
         function renderHistory() {
+            const selectedMonth = monthSelector.value;
+            const daysInMonth = Object.keys(history)
+                .filter(d => d.startsWith(selectedMonth))
+                .sort();
+
             historyList.innerHTML = '';
-            const dates = Object.keys(history).sort().reverse();
-            dates.forEach(date => {
+            daysInMonth.slice().reverse().forEach(date => {
+                const count = history[date];
                 const dateObj = new Date(date + 'T12:00:00');
-                const isWE = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+                const isFull = count >= totalPomodoros;
+                
                 const item = document.createElement('div');
-                item.className = 'flex justify-between py-3 border-b border-gray-100';
-                item.innerHTML = `<span>${dateObj.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'})} (${dateObj.toLocaleDateString('pt-BR', {weekday:'short'})})</span>
-                                  <span class="${isWE ? 'text-gray-400 italic' : 'font-bold text-red-700'}">${isWE ? 'Final de semana' : history[date] + ' pomodoros'}</span>`;
+                item.className = 'flex justify-between items-center p-3 border-b border-gray-50';
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium">${dateObj.toLocaleDateString('pt-BR', {day:'2-digit', weekday:'short'})}</span>
+                        ${isFull ? '<span class="star-icon text-xl">★</span>' : ''}
+                    </div>
+                    <span class="${isFull ? 'text-red-700 font-bold' : 'text-gray-500'}">${count} sessões</span>
+                `;
                 historyList.appendChild(item);
             });
 
             const ctx = document.getElementById('historyChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-            const recent = dates.slice(0, 7).reverse();
+            
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: recent.map(d => d.split('-')[2] + '/' + d.split('-')[1]),
-                    datasets: [{ data: recent.map(d => history[d]), backgroundColor: '#ba1a1a', borderRadius: 6 }]
+                    labels: daysInMonth.map(d => d.split('-')[2]),
+                    datasets: [{
+                        data: daysInMonth.map(d => history[d]),
+                        backgroundColor: daysInMonth.map(d => history[d] >= 14 ? '#ba1a1a' : '#f5ddda'),
+                        borderRadius: 4
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { display: false, max: 15 }, x: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { 
+                        y: { max: 14, ticks: { stepSize: 2 } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
             });
         }
 
-        completeBtn.onclick = () => {
-            const idx = state.indexOf(false);
-            if (idx !== -1) {
-                state[idx] = true;
-                save();
-                init();
+        document.getElementById('completeBtn').onclick = () => {
+            const next = state.indexOf(false);
+            if (next !== -1) {
+                state[next] = true;
+                initGrid();
                 triggerConfetti();
             }
         };
 
-        viewHistoryBtn.onclick = () => { renderHistory(); historyModal.style.display = 'flex'; };
-        closeHistoryBtn.onclick = () => { historyModal.style.display = 'none'; };
-        init();
+        document.getElementById('goHistoryBtn').onclick = () => {
+            mainPage.classList.remove('active');
+            historyPage.classList.add('active');
+            setupMonthSelector();
+            renderHistory();
+        };
+
+        document.getElementById('backBtn').onclick = () => {
+            historyPage.classList.remove('active');
+            mainPage.classList.add('active');
+        };
+
+        monthSelector.onchange = renderHistory;
+
+        checkReset();
+        initGrid();
     </script>
 </body>
 </html>
