@@ -2,11 +2,10 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pomodoro Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Chart.js para o gráfico de histórico -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -20,43 +19,79 @@
             --md-sys-color-surface-variant: #f5ddda;
         }
 
-        body {
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
             font-family: 'Google Sans', sans-serif;
-            background-color: transparent;
+            background-color: var(--md-sys-color-surface);
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; 
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
             color: #1f1b1b;
-            overflow-x: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0; /* Removidas margens externas */
         }
 
         .card {
             background-color: var(--md-sys-color-surface);
-            border-radius: 28px;
             padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            max-width: 400px;
-            width: 90%;
+            width: 100%; /* Ocupa toda a largura disponível */
+            height: 100%; /* Ocupa toda a altura disponível */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: none; /* Removidas as bordas do card */
+            box-shadow: none; /* Removida a sombra para integração total */
+            overflow: hidden;
+        }
+
+        .header-section {
+            flex-shrink: 0;
             text-align: center;
-            border: 1px solid var(--md-sys-color-surface-variant);
-            position: relative;
-            transition: transform 0.3s ease;
+        }
+
+        .tomato-section {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
         }
 
         .tomato-container {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 24px;
+            width: 30vh;
+            height: 30vh;
+            max-width: 160px;
+            max-height: 160px;
             position: relative;
+        }
+
+        .grid-section {
+            flex-shrink: 0;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 600px; /* Limite para não ficar excessivamente largo em monitores UltraWide */
         }
 
         .grid-pomodoros {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 12px;
-            margin-bottom: 32px;
         }
 
         .checkbox-wrapper {
@@ -65,6 +100,7 @@
             padding-top: 100%;
         }
 
+        /* Tooltip */
         .checkbox-wrapper::before {
             content: attr(data-time);
             position: absolute;
@@ -80,7 +116,7 @@
             opacity: 0;
             visibility: hidden;
             transition: all 0.2s ease;
-            z-index: 10;
+            z-index: 50;
             pointer-events: none;
         }
 
@@ -104,6 +140,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: white;
         }
 
         .pomodoro-checkbox:hover {
@@ -115,18 +152,24 @@
         .pomodoro-checkbox:checked {
             background-color: var(--md-sys-color-primary);
             border-color: var(--md-sys-color-primary);
-            transform: scale(0.95);
         }
 
         .pomodoro-checkbox::after {
             content: attr(data-index);
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--md-sys-color-outline);
         }
 
         .pomodoro-checkbox:checked::after {
             color: white;
+        }
+
+        .actions-section {
+            flex-shrink: 0;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
         .btn-complete {
@@ -140,72 +183,51 @@
             width: 100%;
             transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 16px;
         }
 
         .btn-complete:hover {
-            box-shadow: 0 4px 12px rgba(186, 26, 26, 0.4);
             filter: brightness(1.1);
+            box-shadow: 0 4px 12px rgba(186, 26, 26, 0.3);
         }
 
         .btn-history {
-            margin-top: 16px;
+            margin-top: 12px;
             background: none;
             border: none;
             color: var(--md-sys-color-outline);
             font-size: 14px;
             cursor: pointer;
             opacity: 0.8;
-            transition: opacity 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
             width: 100%;
         }
-        
-        .btn-history:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
 
-        /* Modal de Histórico */
         #history-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0,0,0,0.5);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 100;
-            padding: 20px;
+            padding: 16px;
         }
 
         .modal-content {
             background: var(--md-sys-color-surface);
             border-radius: 28px;
-            width: 100%;
+            width: 95%;
             max-width: 450px;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
             padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--md-sys-color-surface-variant);
-        }
-
-        .weekend-text {
-            color: var(--md-sys-color-outline);
-            font-style: italic;
-            font-size: 12px;
         }
 
         #tomato-fill {
@@ -213,59 +235,65 @@
         }
 
         .chart-container {
-            margin-top: 20px;
-            height: 200px;
+            height: 180px;
+            margin: 15px 0;
         }
     </style>
 </head>
 <body>
 
-    <div class="card" id="main-card">
-        <h1 class="text-xl font-bold mb-1 text-gray-800">Foco Diário</h1>
-        <p id="date-display" class="text-[10px] text-gray-400 mb-6 uppercase tracking-[0.2em] font-medium"></p>
-        
-        <div class="tomato-container">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <clipPath id="tomato-clip">
-                        <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" />
-                    </clipPath>
-                </defs>
-                <path d="M50 22 L45 10 L50 15 L55 10 L50 22 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-                <path d="M50 22 L35 15 L45 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-                <path d="M50 22 L65 15 L55 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
-                <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" 
-                      fill="none" stroke="#ba1a1a" stroke-width="3" />
-                <rect id="tomato-fill" x="0" y="90" width="100" height="0" fill="#ba1a1a" clip-path="url(#tomato-clip)" />
-            </svg>
+    <div class="app-container">
+        <div class="card" id="main-card">
+            <div class="header-section">
+                <h1 class="text-2xl font-bold text-gray-800">Foco Diário</h1>
+                <p id="date-display" class="text-[11px] text-gray-400 uppercase tracking-[0.2em] font-medium mt-1"></p>
+            </div>
+            
+            <div class="tomato-section">
+                <div class="tomato-container">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <clipPath id="tomato-clip">
+                                <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" />
+                            </clipPath>
+                        </defs>
+                        <path d="M50 22 L45 10 L50 15 L55 10 L50 22 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+                        <path d="M50 22 L35 15 L45 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+                        <path d="M50 22 L65 15 L55 18 Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="1"/>
+                        <path d="M50 20 C30 20 15 35 15 55 C15 75 35 90 50 90 C65 90 85 75 85 55 C85 35 70 20 50 20 Z" 
+                              fill="none" stroke="#ba1a1a" stroke-width="2" />
+                        <rect id="tomato-fill" x="0" y="90" width="100" height="0" fill="#ba1a1a" clip-path="url(#tomato-clip)" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="grid-section">
+                <div class="grid-pomodoros" id="grid"></div>
+            </div>
+
+            <div class="actions-section">
+                <button class="btn-complete" id="completeBtn">Completar Sessão</button>
+                <button class="btn-history" id="viewHistoryBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.41 1.711a7.07 7.07 0 0 0-.045-.51l.98-.203c.04.195.07.394.09.596l-.993.05a7.02 7.02 0 0 0-.032-.443zM16 8h-1a7 7 0 0 0-.023.515l.997.074A8 8 0 0 1 16 8zM1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm7-5a.5.5 0 0 1 .5.5v3.793l1.354 1.353a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 7.5 6.5V3.5a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                    Histórico
+                </button>
+            </div>
         </div>
-
-        <div class="grid-pomodoros" id="grid"></div>
-
-        <button class="btn-complete" id="completeBtn">Completar Sessão</button>
-        <button class="btn-history" id="viewHistoryBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.41 1.711a7.07 7.07 0 0 0-.045-.51l.98-.203c.04.195.07.394.09.596l-.993.05a7.02 7.02 0 0 0-.032-.443zM16 8h-1a7 7 0 0 0-.023.515l.997.074A8 8 0 0 1 16 8zM1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm7-5a.5.5 0 0 1 .5.5v3.793l1.354 1.353a.5.5 0 0 1-.708.708l-1.5-1.5A.5.5 0 0 1 7.5 6.5V3.5a.5.5 0 0 1 .5-.5z"/>
-            </svg>
-            Ver histórico
-        </button>
     </div>
 
     <!-- Modal de Histórico -->
     <div id="history-modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold">Histórico e Estatísticas</h2>
-                <button id="closeHistoryBtn" class="text-gray-400 hover:text-gray-600">✕</button>
+                <h2 class="text-lg font-bold">Estatísticas</h2>
+                <button id="closeHistoryBtn" class="text-gray-400 hover:text-gray-600 p-2 text-xl">✕</button>
             </div>
-            
             <div class="chart-container">
                 <canvas id="historyChart"></canvas>
             </div>
-
-            <div id="history-list" class="mt-6">
-                <!-- Lista de dias será injetada aqui -->
-            </div>
+            <div id="history-list" class="mt-4 text-sm overflow-y-auto max-h-[40vh]"></div>
         </div>
     </div>
 
@@ -299,13 +327,11 @@
             const lastDate = localStorage.getItem('pomodoro_date');
             
             if (lastDate && lastDate !== today) {
-                // Antes de resetar, salva o estado do dia anterior no histórico se houver progresso
                 const completedCount = state.filter(v => v).length;
                 if (completedCount > 0 || lastDate) {
                     history[lastDate] = completedCount;
                     localStorage.setItem('pomodoro_history_v2', JSON.stringify(history));
                 }
-                
                 state = Array(totalPomodoros).fill(false);
                 save();
             }
@@ -314,7 +340,6 @@
 
         function init() {
             checkDailyReset();
-            
             const options = { weekday: 'long', day: 'numeric', month: 'long' };
             dateDisplay.innerText = new Date().toLocaleDateString('pt-BR', options);
 
@@ -329,7 +354,7 @@
                 cb.className = 'pomodoro-checkbox';
                 cb.checked = checked;
                 cb.dataset.index = i + 1;
-                cb.onclick = (e) => {
+                cb.onclick = () => {
                     togglePomodoro(i);
                     if (cb.checked) triggerConfetti();
                 };
@@ -344,8 +369,6 @@
             state[index] = !state[index];
             save();
             updateTomato();
-            
-            // Atualiza o histórico em tempo real para o dia atual
             const today = getTodayString();
             history[today] = state.filter(v => v).length;
             localStorage.setItem('pomodoro_history_v2', JSON.stringify(history));
@@ -356,7 +379,6 @@
             const percentage = completedCount / totalPomodoros;
             const fillHeight = percentage * 70;
             const newY = 90 - fillHeight;
-            
             fill.setAttribute('height', fillHeight);
             fill.setAttribute('y', newY);
         }
@@ -368,16 +390,11 @@
 
         function triggerConfetti() {
             confetti({
-                particleCount: 80,
-                spread: 60,
-                origin: { y: 0.7 },
+                particleCount: 60,
+                spread: 50,
+                origin: { y: 0.8 },
                 colors: ['#ba1a1a', '#ffdad6', '#2e7d32']
             });
-        }
-
-        function isWeekend(dateStr) {
-            const date = new Date(dateStr + 'T12:00:00'); // T12:00 para evitar problemas de fuso
-            return date.getDay() === 0 || date.getDay() === 6;
         }
 
         function renderHistory() {
@@ -385,70 +402,48 @@
             const dates = Object.keys(history).sort().reverse();
             
             if (dates.length === 0) {
-                historyList.innerHTML = '<p class="text-center text-gray-400 py-4">Nenhum registro ainda.</p>';
+                historyList.innerHTML = '<p class="text-center text-gray-400 py-4">Sem registros.</p>';
                 return;
             }
 
             dates.forEach(date => {
                 const count = history[date];
                 const item = document.createElement('div');
-                item.className = 'history-item';
+                item.className = 'flex justify-between py-3 border-b border-gray-100';
                 
                 const dateObj = new Date(date + 'T12:00:00');
+                const isWE = dateObj.getDay() === 0 || dateObj.getDay() === 6;
                 const formattedDate = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                const dayName = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' });
 
-                const infoDiv = document.createElement('div');
-                infoDiv.innerHTML = `<span class="font-medium">${formattedDate}</span> <span class="text-xs text-gray-400 ml-1">(${dayName})</span>`;
-                
-                const valueDiv = document.createElement('div');
-                if (isWeekend(date)) {
-                    valueDiv.className = 'weekend-text';
-                    valueDiv.innerText = 'Final de semana';
-                } else {
-                    valueDiv.className = 'text-sm font-bold text-red-700';
-                    valueDiv.innerText = `${count} pomodoros`;
-                }
-
-                item.appendChild(infoDiv);
-                item.appendChild(valueDiv);
+                item.innerHTML = `
+                    <span>${formattedDate} (${dateObj.toLocaleDateString('pt-BR', {weekday: 'short'})})</span>
+                    <span class="${isWE ? 'text-gray-400 italic' : 'font-bold text-red-700'}">
+                        ${isWE ? 'Final de semana' : count + ' pomodoros'}
+                    </span>
+                `;
                 historyList.appendChild(item);
             });
-
             renderChart(dates.slice(0, 7).reverse());
         }
 
         let chartInstance = null;
         function renderChart(recentDates) {
             const ctx = document.getElementById('historyChart').getContext('2d');
-            
             if (chartInstance) chartInstance.destroy();
-
-            const labels = recentDates.map(d => {
-                const parts = d.split('-');
-                return `${parts[2]}/${parts[1]}`;
-            });
-            const data = recentDates.map(d => history[d]);
-
             chartInstance = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: recentDates.map(d => d.split('-')[2] + '/' + d.split('-')[1]),
                     datasets: [{
-                        label: 'Pomodoros',
-                        data: data,
+                        data: recentDates.map(d => history[d]),
                         backgroundColor: '#ba1a1a',
-                        borderRadius: 8,
-                        barThickness: 20
+                        borderRadius: 6
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 15, ticks: { stepSize: 3 } },
-                        x: { grid: { display: false } }
-                    },
+                    scales: { y: { beginAtZero: true, max: 15, display: false }, x: { grid: { display: false } } },
                     plugins: { legend: { display: false } }
                 }
             });
@@ -461,28 +456,15 @@
                 save();
                 init();
                 triggerConfetti();
-                
-                // Atualiza histórico
-                const today = getTodayString();
-                history[today] = state.filter(v => v).length;
+                history[getTodayString()] = state.filter(v => v).length;
                 localStorage.setItem('pomodoro_history_v2', JSON.stringify(history));
             }
         };
 
-        viewHistoryBtn.onclick = () => {
-            renderHistory();
-            historyModal.style.display = 'flex';
-        };
+        viewHistoryBtn.onclick = () => { renderHistory(); historyModal.style.display = 'flex'; };
+        closeHistoryBtn.onclick = () => { historyModal.style.display = 'none'; };
+        window.onclick = (e) => { if (e.target == historyModal) historyModal.style.display = 'none'; };
 
-        closeHistoryBtn.onclick = () => {
-            historyModal.style.display = 'none';
-        };
-
-        window.onclick = (event) => {
-            if (event.target == historyModal) historyModal.style.display = 'none';
-        };
-
-        setInterval(checkDailyReset, 60000);
         init();
     </script>
 </body>
