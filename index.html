@@ -47,7 +47,7 @@
         /* Layout Adaptável */
         .main-content {
             display: flex;
-            flex-direction: column; /* Padrão Retrato */
+            flex-direction: column; 
             flex-grow: 1;
             gap: 16px;
             align-items: center;
@@ -67,13 +67,6 @@
             }
         }
 
-        .header-section {
-            flex-shrink: 0;
-            text-align: center;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-
         .tomato-section {
             display: flex;
             justify-content: center;
@@ -82,12 +75,12 @@
         }
 
         .tomato-container {
-            width: 25vh;
-            height: 25vh;
-            max-width: 180px;
-            max-height: 180px;
-            min-width: 100px;
-            min-height: 100px;
+            width: 30vh;
+            height: 30vh;
+            max-width: 220px;
+            max-height: 220px;
+            min-width: 120px;
+            min-height: 120px;
         }
 
         .grid-section {
@@ -101,14 +94,40 @@
         .grid-pomodoros {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 2%; /* Gap relativo */
+            gap: 2%;
             width: 100%;
         }
 
         .checkbox-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 100%; /* Mantém proporção 1:1 */
+            padding-top: 100%;
+        }
+
+        /* Tooltip de Horário Sugerido */
+        .checkbox-wrapper::before {
+            content: attr(data-time);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%) translateY(5px);
+            background: #410002;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        .checkbox-wrapper:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
         }
 
         .pomodoro-checkbox {
@@ -119,7 +138,7 @@
             height: 100%;
             appearance: none;
             border: 2px solid var(--md-sys-color-outline);
-            border-radius: clamp(8px, 2vh, 14px); /* Arredondamento responsivo */
+            border-radius: clamp(8px, 2vh, 14px);
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
@@ -145,7 +164,6 @@
             color: white;
         }
 
-        /* Botões de Ação Lado a Lado */
         .actions-row {
             display: flex;
             gap: 12px;
@@ -179,11 +197,6 @@
             transform: translateY(-1px);
         }
 
-        .icon-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Modal Ajustado */
         #history-modal {
             position: fixed;
             top: 0;
@@ -216,11 +229,8 @@
 <body>
 
     <div class="app-container">
-        <div class="header-section">
-            <h1 class="text-xl font-bold text-gray-800">Foco Diário</h1>
-            <p id="date-display" class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-medium"></p>
-        </div>
-
+        <!-- Secção de cabeçalho removida a pedido -->
+        
         <div class="main-content">
             <div class="tomato-section">
                 <div class="tomato-container">
@@ -244,11 +254,9 @@
                 <div class="grid-pomodoros" id="grid"></div>
                 
                 <div class="actions-row">
-                    <!-- Botão Completar Sessão -->
                     <button class="icon-btn" id="completeBtn" title="Completar Sessão">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     </button>
-                    <!-- Botão Ver Histórico -->
                     <button class="icon-btn secondary" id="viewHistoryBtn" title="Ver Histórico">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
                     </button>
@@ -257,7 +265,6 @@
         </div>
     </div>
 
-    <!-- Modal de Histórico -->
     <div id="history-modal">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -273,6 +280,12 @@
 
     <script>
         const totalPomodoros = 15;
+        const suggestedTimes = [
+            "09:00", "09:30", "10:00", "10:30", "11:15",
+            "11:45", "12:15", "12:45", "14:00", "14:30",
+            "15:00", "15:30", "16:00", "16:30", "Extra"
+        ];
+
         const grid = document.getElementById('grid');
         const fill = document.getElementById('tomato-fill');
         const completeBtn = document.getElementById('completeBtn');
@@ -280,7 +293,6 @@
         const closeHistoryBtn = document.getElementById('closeHistoryBtn');
         const historyModal = document.getElementById('history-modal');
         const historyList = document.getElementById('history-list');
-        const dateDisplay = document.getElementById('date-display');
 
         let state = JSON.parse(localStorage.getItem('pomodoro_state')) || Array(totalPomodoros).fill(false);
         let history = JSON.parse(localStorage.getItem('pomodoro_history_v2')) || {};
@@ -304,11 +316,12 @@
 
         function init() {
             checkDailyReset();
-            dateDisplay.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
             grid.innerHTML = '';
             state.forEach((checked, i) => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'checkbox-wrapper';
+                wrapper.setAttribute('data-time', suggestedTimes[i]);
+                
                 const cb = document.createElement('input');
                 cb.type = 'checkbox';
                 cb.className = 'pomodoro-checkbox';
